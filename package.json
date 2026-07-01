@@ -1,0 +1,17 @@
+{
+  "name": "apollo-api-platform",
+  "version": "1.0.0",
+  "description": "Apollo AI API Platform — OpenAI-compatible API wrapper",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "engines": {
+    "node": ">=18.x"
+  }
+}
+
