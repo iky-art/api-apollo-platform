@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Apollo API — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06060E;--surface:#0E0C1A;--card:#16132A;--card2:#1E1A30;
+  --border:#2A2545;--border2:#3D3660;
+  --violet:#7C3AED;--cyan:#06B6D4;--green:#10B981;--red:#EF4444;--orange:#F59E0B;
+  --snow:#F8FAFC;--muted:#8B9DB8;--muted2:#64748B;
+  --rs:10px;--r:14px;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--snow);font-family:'Inter',sans-serif}
+
+.topbar{padding:0 24px;height:56px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(6,6,14,.9);backdrop-filter:blur(14px);position:sticky;top:0;z-index:100}
+.tb-logo{display:flex;align-items:center;gap:10px}
+.tb-gem{width:30px;height:30px;background:linear-gradient(135deg,var(--violet),var(--cyan));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.tb-name{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700}
+.admin-badge{font-size:10px;padding:2px 8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:6px;color:#FCA5A5;font-weight:600}
+
+.layout{display:flex;min-height:calc(100vh - 56px)}
+.sidebar{width:210px;flex-shrink:0;padding:16px 10px;border-right:1px solid var(--border);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.main{flex:1;padding:24px 28px}
+
+.nav-sec{font-size:9.5px;color:var(--muted2);letter-spacing:1.5px;font-weight:600;text-transform:uppercase;padding:4px 10px;margin-bottom:3px;margin-top:14px}
+.nav-item{padding:7px 10px;border-radius:8px;font-size:12.5px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;margin-bottom:2px}
+.nav-item:hover,.nav-item.active{color:var(--snow);background:var(--card)}
+.nav-item.active{border-left:2px solid var(--red)}
+
+.page{display:none}.page.show{display:block}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:22px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.stat-v{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700}
+.stat-l{font-size:11px;color:var(--muted);margin-top:3px}
+
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:18px}
+.ph{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.pt{font-size:13.5px;font-weight:600}
+.pb{padding:16px}
+
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{padding:8px 12px;text-align:left;color:var(--muted);font-size:10.5px;font-weight:600;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+
+.tier-badge{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600}
+.tier-badge.free{background:rgba(16,185,129,.1);color:#6EE7B7;border:1px solid rgba(16,185,129,.2)}
+.tier-badge.pro{background:rgba(124,58,237,.1);color:#C4B5FD;border:1px solid rgba(124,58,237,.2)}
+.tier-badge.developer{background:rgba(245,158,11,.1);color:#FCD34D;border:1px solid rgba(245,158,11,.2)}
+.active-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:5px}
+
+.btn{padding:5px 11px;border-radius:7px;font-size:11px;cursor:pointer;border:1px solid var(--border2);background:none;color:var(--muted);font-family:'Inter',sans-serif;transition:all .15s}
+.btn:hover{color:var(--snow);border-color:var(--border)}
+.btn.danger{color:var(--red);border-color:rgba(239,68,68,.3)}
+.btn.primary{background:var(--violet);color:#fff;border-color:var(--violet)}
+.btn.upgrade{color:var(--cyan);border-color:rgba(6,182,212,.3)}
+
+.mono{font-family:'JetBrains Mono',monospace;font-size:11px}
+
+.form-field{margin-bottom:12px}
+.form-field label{display:block;font-size:10.5px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-bottom:5px}
+.form-field input,.form-field select{width:100%;padding:9px 12px;background:var(--card2);border:1px solid var(--border2);border-radius:var(--rs);color:var(--snow);font-family:'Inter',sans-serif;font-size:13px;outline:none}
+.form-field input:focus,.form-field select:focus{border-color:var(--violet)}
+
+.auth-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:200}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:32px;width:360px}
+
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;background:var(--card);border:1px solid var(--border2);border-radius:10px;font-size:13px;z-index:999;display:none}
+.toast.show{display:block}
+
+.empty{text-align:center;padding:32px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-box">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:22px">
+      <div style="width:34px;height:34px;background:linear-gradient(135deg,var(--violet),var(--cyan));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px">✦</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px">Apollo API Admin</div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Masukkan password admin untuk lanjut.</div>
+    <div class="form-field"><label>ADMIN PASSWORD</label><input type="password" id="admin-pass" placeholder="apollo-admin-..."/></div>
+    <div id="auth-err" style="font-size:12px;color:#FCA5A5;display:none;margin-bottom:10px"></div>
+    <button class="btn primary" style="width:100%;padding:10px;font-size:13px" onclick="doAdminLogin()">Masuk</button>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-logo">
+    <div style="overflow:hidden;padding:0;border-radius:9px"><svg viewBox="0 0 30 30" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#FFC107"/></linearGradient><linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00B2FF"/><stop offset="50%" stop-color="#0066FF"/><stop offset="100%" stop-color="#00B2FF"/></linearGradient></defs><rect width="30" height="30" fill="#0B1020"/><ellipse cx="15" cy="19" rx="13" ry="4.5" fill="none" stroke="url(#lg2)" stroke-width="1.2" opacity="0.9" transform="rotate(-10,15,19)"/><line x1="15" y1="4" x2="7" y2="26" stroke="url(#lg1)" stroke-width="2.5" stroke-linecap="round"/><line x1="15" y1="4" x2="23" y2="26" stroke="url(#lg1)" stroke-width="2.5" stroke-linecap="round"/><line x1="9.5" y1="18" x2="20.5" y2="18" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="4" r="2" fill="#FFD700"/></svg></div>
+    <div class="tb-name">Apollo API</div>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span style="font-size:12px;color:var(--muted)">Last refresh: <span id="last-refresh">—</span></span>
+    <button class="btn" onclick="loadAll()">🔄 Refresh</button>
+    <button class="btn danger" onclick="doLogout()">Keluar</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="nav-sec">Dashboard</div>
+    <div class="nav-item active" onclick="showPage('overview',this)">📊 Overview</div>
+    <div class="nav-sec">Manajemen</div>
+    <div class="nav-item" onclick="showPage('keys',this)">🔑 API Keys</div>
+    <div class="nav-item" onclick="showPage('usage',this)">📈 Usage Logs</div>
+    <div class="nav-sec">Tools</div>
+    <div class="nav-item" onclick="showPage('generate',this)">⚡ Generate Key</div>
+    <div class="nav-item" onclick="showPage('docs',this)">📖 API Docs</div>
+  </div>
+
+  <div class="main">
+
+    <!-- OVERVIEW -->
+    <div class="page show" id="page-overview">
+      <div style="margin-bottom:20px">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px">Dashboard Overview</div>
+        <div style="font-size:13px;color:var(--muted)">Statistik realtime Apollo API Platform</div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-v" id="s-total">—</div><div class="stat-l">Total Keys</div></div>
+        <div class="stat"><div class="stat-v" id="s-active">—</div><div class="stat-l">Keys Aktif</div></div>
+        <div class="stat"><div class="stat-v" id="s-reqs">—</div><div class="stat-l">Total Requests</div></div>
+        <div class="stat"><div class="stat-v" id="s-tokens">—</div><div class="stat-l">Token Hari Ini</div></div>
+        <div class="stat"><div class="stat-v" id="s-free">—</div><div class="stat-l">Free Keys</div></div>
+        <div class="stat"><div class="stat-v" id="s-pro">—</div><div class="stat-l">Pro Keys</div></div>
+        <div class="stat"><div class="stat-v" id="s-dev">—</div><div class="stat-l">Dev Keys</div></div>
+      </div>
+    </div>
+
+    <!-- API KEYS -->
+    <div class="page" id="page-keys">
+      <div style="margin-bottom:18px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700">🔑 API Keys</div>
+        <input id="key-search" placeholder="Cari email / key..." oninput="filterKeys(this.value)"
+          style="padding:7px 12px;background:var(--card);border:1px solid var(--border2);border-radius:var(--rs);color:var(--snow);font-size:12px;outline:none;width:220px"/>
+      </div>
+      <div class="panel">
+        <table>
+          <thead><tr>
+            <th>KEY</th><th>USER</th><th>TIER</th><th>USAGE</th><th>STATUS</th><th>DIBUAT</th><th>AKSI</th>
+          </tr></thead>
+          <tbody id="keys-table"><tr><td colspan="7" class="empty">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- USAGE LOGS -->
+    <div class="page" id="page-usage">
+      <div style="margin-bottom:18px;font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700">📈 Usage Logs</div>
+      <div class="panel">
+        <table>
+          <thead><tr>
+            <th>WAKTU</th><th>MODEL</th><th>TOKENS</th><th>USER</th>
+          </tr></thead>
+          <tbody id="usage-table"><tr><td colspan="4" class="empty">Memuat...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GENERATE KEY -->
+    <div class="page" id="page-generate">
+      <div style="margin-bottom:18px;font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700">⚡ Generate Key Manual</div>
+      <div class="panel" style="max-width:500px">
+        <div class="ph"><span class="pt">Buat API Key untuk User</span></div>
+        <div class="pb">
+          <div class="form-field"><label>USER ID (dari Supabase)</label><input id="gen-userid" placeholder="uuid user..."/></div>
+          <div class="form-field"><label>NAMA KEY</label><input id="gen-name" placeholder="Developer Key" value="Developer Key"/></div>
+          <div class="form-field"><label>TIER</label>
+            <select id="gen-tier">
+              <option value="free">Free — 100 req/hari</option>
+              <option value="pro">Pro — 1.000 req/hari</option>
+              <option value="developer" selected>Developer — 10.000 req/hari</option>
+            </select>
+          </div>
+          <div class="form-field"><label>EXPIRED (HARI, KOSONGKAN = TIDAK EXPIRED)</label><input type="number" id="gen-days" placeholder="Contoh: 365"/></div>
+          <button class="btn primary" style="width:100%;padding:10px;font-size:13px" onclick="adminGenerateKey()">⚡ Generate Key</button>
+          <div id="gen-result" style="display:none;margin-top:14px;padding:12px;background:var(--card2);border:1px solid var(--border2);border-radius:var(--rs)">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:6px">KEY BERHASIL DIBUAT:</div>
+            <div id="gen-key-text" class="mono" style="color:var(--cyan);word-break:break-all;font-size:13px"></div>
+            <button class="btn" style="margin-top:10px;font-size:11px" onclick="copyGenKey()">📋 Copy</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCS -->
+    <div class="page" id="page-docs">
+      <div style="margin-bottom:18px;font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700">📖 API Reference</div>
+      <div class="panel">
+        <div class="ph"><span class="pt">Base URL</span></div>
+        <div class="pb">
+          <code class="mono" style="color:var(--cyan);font-size:14px">https://apollo-api.vercel.app</code>
+          <div style="font-size:12px;color:var(--muted);margin-top:8px">Semua request harus menyertakan header:<br><code class="mono">Authorization: Bearer apollo-sk-xxxx-xxxx-xxxx</code></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">Endpoints</span></div>
+        <div class="pb">
+          <table>
+            <thead><tr><th>METHOD</th><th>ENDPOINT</th><th>KETERANGAN</th></tr></thead>
+            <tbody>
+              <tr><td><span style="color:var(--green)">POST</span></td><td class="mono">/v1/chat/completions</td><td>Chat dengan AI model</td></tr>
+              <tr><td><span style="color:var(--cyan)">GET</span></td><td class="mono">/v1/models</td><td>List model yang tersedia</td></tr>
+              <tr><td><span style="color:var(--cyan)">GET</span></td><td class="mono">/api/keys</td><td>List API keys milik user</td></tr>
+              <tr><td><span style="color:var(--green)">POST</span></td><td class="mono">/api/keys</td><td>Generate API key baru</td></tr>
+              <tr><td><span style="color:var(--red)">DELETE</span></td><td class="mono">/api/keys</td><td>Hapus API key</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">Rate Limits & Tier</span></div>
+        <div class="pb">
+          <table>
+            <thead><tr><th>TIER</th><th>DAILY</th><th>RPM</th><th>MODELS</th><th>MAX KEYS</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tier-badge free">FREE</span></td><td>100</td><td>5</td><td>Nano, Core</td><td>1</td></tr>
+              <tr><td><span class="tier-badge pro">PRO</span></td><td>1.000</td><td>20</td><td>Semua</td><td>5</td></tr>
+              <tr><td><span class="tier-badge developer">DEVELOPER</span></td><td>10.000</td><td>60</td><td>Semua</td><td>999</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL = 'https://apollo-api.vercel.app';
+let adminPass = sessionStorage.getItem('apollo_admin_pass') || '';
+let allKeys = [];
+
+function toast(msg, ok=true){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.style.borderColor=ok?'var(--green)':'var(--red)';
+  el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+async function adminFetch(path, opts={}){
+  const res = await fetch(API_URL+path, {
+    ...opts,
+    headers:{ 'x-admin-password': adminPass, 'Content-Type':'application/json', ...(opts.headers||{}) }
+  });
+  if(!res.ok){ const e=await res.json().catch(()=>({})); throw new Error(e.error||'HTTP '+res.status); }
+  return res.json();
+}
+
+// Auth
+function doAdminLogin(){
+  const pass = document.getElementById('admin-pass').value;
+  if(!pass){ document.getElementById('auth-err').textContent='Password wajib diisi.'; document.getElementById('auth-err').style.display='block'; return; }
+  adminPass = pass;
+  sessionStorage.setItem('apollo_admin_pass', pass);
+  loadAll();
+}
+
+function doLogout(){
+  sessionStorage.removeItem('apollo_admin_pass');
+  adminPass='';
+  document.getElementById('auth-screen').style.display='flex';
+}
+
+// Load all
+async function loadAll(){
+  try{
+    await Promise.all([loadStats(), loadKeys(), loadUsageLogs()]);
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('last-refresh').textContent = new Date().toLocaleTimeString('id');
+  } catch(e){
+    document.getElementById('auth-err').textContent = 'Password salah atau server error.';
+    document.getElementById('auth-err').style.display = 'block';
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+}
+
+async function loadStats(){
+  const d = await adminFetch('/api/admin?action=stats');
+  document.getElementById('s-total').textContent = d.totalKeys||0;
+  document.getElementById('s-active').textContent = d.activeKeys||0;
+  document.getElementById('s-reqs').textContent = d.totalReqs||0;
+  document.getElementById('s-tokens').textContent = (d.todayTokens||0).toLocaleString();
+  document.getElementById('s-free').textContent = d.byTier?.free||0;
+  document.getElementById('s-pro').textContent = d.byTier?.pro||0;
+  document.getElementById('s-dev').textContent = d.byTier?.developer||0;
+}
+
+async function loadKeys(){
+  const d = await adminFetch('/api/admin?action=keys');
+  allKeys = d.keys||[];
+  renderKeys(allKeys);
+}
+
+function renderKeys(keys){
+  const tb = document.getElementById('keys-table');
+  if(!keys.length){ tb.innerHTML='<tr><td colspan="7" class="empty">Tidak ada data</td></tr>'; return; }
+  tb.innerHTML = keys.map(k=>`
+    <tr>
+      <td class="mono">${k.key.slice(0,22)}...</td>
+      <td style="font-size:12px">${k.users?.email||'—'}<br><span style="color:var(--muted2);font-size:11px">${k.users?.name||''}</span></td>
+      <td><span class="tier-badge ${k.tier}">${k.tier}</span></td>
+      <td>${k.usage_count||0}</td>
+      <td><span class="active-dot" style="background:${k.is_active?'var(--green)':'var(--red)'}"></span>${k.is_active?'Aktif':'Nonaktif'}</td>
+      <td style="font-size:11px;color:var(--muted)">${new Date(k.created_at).toLocaleDateString('id')}</td>
+      <td>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <button class="btn upgrade" onclick="upgradeTier('${k.id}','${k.tier}')">Tier</button>
+          <button class="btn danger" onclick="revokeKey('${k.id}')">Revoke</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filterKeys(q){
+  const filtered = allKeys.filter(k=>
+    !q || (k.key||'').includes(q) || (k.users?.email||'').toLowerCase().includes(q.toLowerCase())
+  );
+  renderKeys(filtered);
+}
+
+async function upgradeTier(id, current){
+  const tiers = ['free','pro','developer'];
+  const next = prompt(`Tier sekarang: ${current}\nMasukkan tier baru (free/pro/developer):`, current);
+  if(!next || !tiers.includes(next)) return;
+  try{
+    await adminFetch('/api/admin?action=upgrade',{method:'POST',body:JSON.stringify({key_id:id,tier:next})});
+    toast('✅ Tier diupdate ke '+next);
+    loadKeys();
+  } catch(e){ toast('❌ '+e.message, false); }
+}
+
+async function revokeKey(id){
+  if(!confirm('Revoke key ini? User tidak bisa pakai lagi.')) return;
+  try{
+    await adminFetch('/api/admin?action=revoke',{method:'POST',body:JSON.stringify({key_id:id})});
+    toast('✅ Key direvoke.');
+    loadKeys();
+  } catch(e){ toast('❌ '+e.message, false); }
+}
+
+async function loadUsageLogs(){
+  try{
+    const d = await adminFetch('/api/admin?action=usage');
+    const logs = d.usage||[];
+    const tb = document.getElementById('usage-table');
+    if(!logs.length){ tb.innerHTML='<tr><td colspan="4" class="empty">Belum ada usage log</td></tr>'; return; }
+    tb.innerHTML = logs.map(u=>`
+      <tr>
+        <td style="font-size:11px;color:var(--muted)">${new Date(u.created_at).toLocaleString('id')}</td>
+        <td class="mono">${u.model||'—'}</td>
+        <td>${u.total_tokens||0}</td>
+        <td style="font-size:11px">${u.api_keys?.users?.email||'—'}</td>
+      </tr>
+    `).join('');
+  } catch(e){ console.warn(e.message); }
+}
+
+async function adminGenerateKey(){
+  const userId   = document.getElementById('gen-userid').value.trim();
+  const name     = document.getElementById('gen-name').value.trim() || 'Developer Key';
+  const tier     = document.getElementById('gen-tier').value;
+  const days     = document.getElementById('gen-days').value;
+  if(!userId){ alert('User ID wajib diisi.'); return; }
+
+  try{
+    // Admin generate via supabase service role langsung
+    const res = await fetch(API_URL+'/api/keys', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'x-admin-password': adminPass },
+      body: JSON.stringify({ user_id: userId, name, tier, expires_days: days ? parseInt(days) : null })
+    });
+    const d = await res.json();
+    if(!res.ok) throw new Error(d.error);
+    document.getElementById('gen-key-text').textContent = d.key?.key || 'Error';
+    document.getElementById('gen-result').style.display = 'block';
+    toast('✅ Key berhasil dibuat!');
+    loadKeys();
+  } catch(e){ toast('❌ '+e.message, false); }
+}
+
+function copyGenKey(){
+  const key = document.getElementById('gen-key-text').textContent;
+  navigator.clipboard?.writeText(key).then(()=>toast('✅ Disalin!'));
+}
+
+function showPage(id, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('show'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('show');
+  if(el) el.classList.add('active');
+}
+
+// Enter key on login
+document.addEventListener('keydown', e=>{ if(e.key==='Enter') doAdminLogin(); });
+
+// Auto login kalau sudah ada password
+if(adminPass) loadAll();
+</script>
+</body>
+</html>
