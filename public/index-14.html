@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Apollo API — Developer Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06060E;--surface:#0E0C1A;--card:#16132A;--card2:#1E1A30;
+  --border:#2A2545;--border2:#3D3660;
+  --violet:#7C3AED;--violet2:#6D28D9;--vglow:rgba(124,58,237,.25);
+  --cyan:#06B6D4;--green:#10B981;--red:#EF4444;--orange:#F59E0B;
+  --snow:#F8FAFC;--muted:#8B9DB8;--muted2:#64748B;
+  --rs:10px;--r:14px;
+}
+html,body{min-height:100%;background:var(--bg);color:var(--snow);font-family:'Inter',sans-serif}
+a{color:inherit;text-decoration:none}
+
+/* TOPBAR */
+.topbar{padding:0 24px;height:58px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(6,6,14,.9);backdrop-filter:blur(14px);position:sticky;top:0;z-index:100}
+.tb-logo{display:flex;align-items:center;gap:10px}
+.tb-gem{width:32px;height:32px;background:linear-gradient(135deg,var(--violet),var(--cyan));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.tb-name{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700}
+.tb-name span{color:var(--muted);font-weight:400;font-size:13px;margin-left:4px}
+.tb-actions{display:flex;align-items:center;gap:10px}
+.tb-link{padding:7px 14px;font-size:12.5px;color:var(--muted);border-radius:8px;cursor:pointer;transition:all .15s}
+.tb-link:hover{color:var(--snow);background:var(--card)}
+.btn-primary{padding:8px 18px;background:linear-gradient(135deg,var(--violet),var(--violet2));border:none;border-radius:var(--rs);color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer}
+.btn-outline{padding:8px 18px;background:none;border:1px solid var(--border2);border-radius:var(--rs);color:var(--snow);font-family:'Inter',sans-serif;font-size:13px;cursor:pointer}
+.btn-outline:hover{border-color:var(--violet)}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 58px)}
+.sidebar{width:220px;flex-shrink:0;padding:20px 12px;border-right:1px solid var(--border);position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto}
+.main{flex:1;padding:28px 32px;max-width:900px}
+
+.nav-sec{font-size:10px;color:var(--muted2);letter-spacing:1.5px;font-weight:600;text-transform:uppercase;padding:4px 10px;margin-bottom:4px;margin-top:16px}
+.nav-item{padding:8px 12px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;margin-bottom:2px}
+.nav-item:hover{color:var(--snow);background:var(--card)}
+.nav-item.active{color:var(--snow);background:var(--card);border-left:2px solid var(--violet)}
+.nav-ico{font-size:14px;width:16px;text-align:center}
+
+/* PAGES */
+.page{display:none}
+.page.show{display:block}
+
+/* HERO */
+.hero{padding:40px 0 32px;border-bottom:1px solid var(--border);margin-bottom:28px}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;margin-bottom:8px}
+.hero p{font-size:14px;color:var(--muted);line-height:1.7;max-width:520px}
+
+/* STAT CARDS */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.stat-val{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;color:var(--snow)}
+.stat-label{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
+.panel-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:14px;font-weight:600}
+.panel-body{padding:18px}
+
+/* API KEY CARD */
+.key-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--rs);padding:14px 16px;margin-bottom:10px}
+.key-row{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.key-name{font-size:13.5px;font-weight:600;flex:1}
+.tier-badge{font-size:10px;padding:2px 8px;border-radius:6px;font-weight:700}
+.tier-badge.free{background:rgba(16,185,129,.12);color:#6EE7B7;border:1px solid rgba(16,185,129,.25)}
+.tier-badge.pro{background:rgba(124,58,237,.12);color:#C4B5FD;border:1px solid rgba(124,58,237,.25)}
+.tier-badge.developer{background:rgba(245,158,11,.12);color:#FCD34D;border:1px solid rgba(245,158,11,.25)}
+.key-val{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);background:var(--card2);padding:8px 12px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border)}
+.key-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.key-meta{display:flex;gap:16px;font-size:11px;color:var(--muted2)}
+.key-actions{display:flex;gap:8px;margin-top:10px}
+.btn-sm{padding:5px 12px;font-size:11.5px;border-radius:7px;cursor:pointer;border:1px solid var(--border2);background:none;color:var(--muted);font-family:'Inter',sans-serif;transition:all .15s}
+.btn-sm:hover{color:var(--snow);border-color:var(--border)}
+.btn-sm.danger:hover{color:var(--red);border-color:var(--red)}
+.btn-sm.copy{background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.25);color:var(--violet)}
+
+/* FORM */
+.form-field{margin-bottom:14px}
+.form-field label{display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.3px;margin-bottom:6px}
+.form-field input,.form-field select{width:100%;padding:10px 13px;background:var(--card2);border:1px solid var(--border2);border-radius:var(--rs);color:var(--snow);font-family:'Inter',sans-serif;font-size:13.5px;outline:none}
+.form-field input:focus,.form-field select:focus{border-color:var(--violet)}
+
+/* CODE BLOCKS */
+.code-block{background:#0D0B1A;border:1px solid var(--border);border-radius:var(--rs);padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:#C4B5FD;overflow-x:auto;margin-bottom:16px;position:relative}
+.code-block .comment{color:var(--muted2)}
+.code-block .string{color:#86EFAC}
+.code-block .key{color:#93C5FD}
+.code-block .num{color:#FCD34D}
+.copy-code{position:absolute;top:8px;right:8px;padding:4px 10px;background:var(--card);border:1px solid var(--border2);border-radius:6px;font-size:10.5px;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif}
+
+/* MODEL LIST */
+.model-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.model-row:last-child{border-bottom:none}
+.model-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+.model-dot.pro{background:var(--violet)}
+.model-name{font-size:13px;font-weight:600;flex:1}
+.model-id{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;background:var(--card);border:1px solid var(--border2);border-radius:10px;font-size:13px;z-index:999;display:none}
+.toast.show{display:block}
+
+/* AUTH OVERLAY */
+.auth-overlay{position:fixed;inset:0;background:rgba(6,6,14,.95);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(8px)}
+.auth-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:36px 32px;width:100%;max-width:380px}
+.auth-title{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.6}
+.auth-err{font-size:12px;color:#FCA5A5;margin-bottom:12px;display:none}
+
+/* EMPTY */
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.empty-ico{font-size:36px;margin-bottom:12px}
+
+@media(max-width:700px){
+  .sidebar{display:none}
+  .main{padding:20px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-box">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,var(--violet),var(--cyan));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px">✦</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700">Apollo API Platform</div>
+    </div>
+    <div class="auth-title">Login ke Akun</div>
+    <div class="auth-sub">Gunakan akun Apollo AI kamu untuk mengakses API platform.</div>
+    <div class="auth-err" id="auth-err"></div>
+    <div class="form-field"><label>EMAIL</label><input type="email" id="auth-email" placeholder="email@contoh.com"/></div>
+    <div class="form-field"><label>PASSWORD</label><input type="password" id="auth-pass" placeholder="Password Apollo AI kamu"/></div>
+    <button class="btn-primary" style="width:100%;padding:12px;font-size:14px" onclick="doLogin()" id="auth-btn">Masuk</button>
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--muted)">
+      Belum punya akun? <a href="https://apollo-ai-nine.vercel.app" style="color:var(--violet)">Daftar di Apollo AI</a>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-logo">
+    <div style="overflow:hidden;padding:0;border-radius:9px"><svg viewBox="0 0 30 30" width="30" height="30" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FFD700"/><stop offset="100%" stop-color="#FFC107"/></linearGradient><linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00B2FF"/><stop offset="50%" stop-color="#0066FF"/><stop offset="100%" stop-color="#00B2FF"/></linearGradient></defs><rect width="30" height="30" fill="#0B1020"/><ellipse cx="15" cy="19" rx="13" ry="4.5" fill="none" stroke="url(#lg2)" stroke-width="1.2" opacity="0.9" transform="rotate(-10,15,19)"/><line x1="15" y1="4" x2="7" y2="26" stroke="url(#lg1)" stroke-width="2.5" stroke-linecap="round"/><line x1="15" y1="4" x2="23" y2="26" stroke="url(#lg1)" stroke-width="2.5" stroke-linecap="round"/><line x1="9.5" y1="18" x2="20.5" y2="18" stroke="url(#lg1)" stroke-width="2" stroke-linecap="round"/><circle cx="15" cy="4" r="2" fill="#FFD700"/></svg></div>
+    <div class="tb-name">Apollo API <span>Platform</span></div>
+  </div>
+  <div class="tb-actions">
+    <a href="/docs" class="tb-link">📖 Docs</a>
+    <a href="https://apollo-ai-nine.vercel.app" class="tb-link">← Apollo AI</a>
+    <div class="tb-link" id="user-email-display" style="color:var(--muted);font-size:12px"></div>
+    <button class="btn-outline" onclick="doLogout()" id="logout-btn" style="display:none;font-size:12px;padding:6px 12px">Keluar</button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+  <div class="sidebar">
+    <div class="nav-sec">Overview</div>
+    <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard',this)"><span class="nav-ico">📊</span> Dashboard</div>
+    <div class="nav-item" data-page="apikeys" onclick="showPage('apikeys',this)"><span class="nav-ico">🔑</span> API Keys</div>
+    <div class="nav-item" data-page="usage" onclick="showPage('usage',this)"><span class="nav-ico">📈</span> Usage</div>
+    <div class="nav-sec">Referensi</div>
+    <div class="nav-item" data-page="models" onclick="showPage('models',this)"><span class="nav-ico">🤖</span> Models</div>
+    <div class="nav-item" data-page="quickstart" onclick="showPage('quickstart',this)"><span class="nav-ico">🚀</span> Quickstart</div>
+    <div class="nav-sec">Akun</div>
+    <div class="nav-item" onclick="doLogout()"><span class="nav-ico">→</span> Keluar</div>
+  </div>
+
+  <div class="main">
+
+    <!-- PAGE: DASHBOARD -->
+    <div class="page show" id="page-dashboard">
+      <div class="hero">
+        <h1>✦ Selamat Datang, <span id="user-name">Developer</span>!</h1>
+        <p>Kelola API key kamu, pantau penggunaan, dan mulai build aplikasi dengan kekuatan Apollo AI.</p>
+      </div>
+      <div class="stats">
+        <div class="stat-card"><div class="stat-val" id="stat-keys">0</div><div class="stat-label">API Keys Aktif</div></div>
+        <div class="stat-card"><div class="stat-val" id="stat-usage">0</div><div class="stat-label">Total Request</div></div>
+        <div class="stat-card"><div class="stat-val" id="stat-tier">Free</div><div class="stat-label">Tier Kamu</div></div>
+        <div class="stat-card"><div class="stat-val" id="stat-limit">100</div><div class="stat-label">Limit / Hari</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">⚡ Mulai Cepat</span></div>
+        <div class="panel-body">
+          <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Buat API key dan langsung mulai pakai:</div>
+          <button class="btn-primary" onclick="showPage('apikeys',document.querySelector('[data-page=apikeys]'))">🔑 Buat API Key Pertama</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: API KEYS -->
+    <div class="page" id="page-apikeys">
+      <div class="hero">
+        <h1>🔑 API Keys</h1>
+        <p>Buat dan kelola API key untuk mengakses Apollo AI API. Jaga kerahasiaan key kamu.</p>
+      </div>
+
+      <!-- Generate key form -->
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">➕ Buat API Key Baru</span></div>
+        <div class="panel-body">
+          <div class="form-field"><label>NAMA KEY</label><input id="key-name" placeholder="Contoh: My App Key" maxlength="50"/></div>
+          <button class="btn-primary" onclick="generateKey()">⚡ Generate Key</button>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px">Tier Free: max 1 key · 100 req/hari · Model: Nano & Core saja</div>
+        </div>
+      </div>
+
+      <!-- Key list -->
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">📋 Keys Kamu</span>
+          <button class="btn-sm" onclick="loadKeys()">🔄 Refresh</button>
+        </div>
+        <div class="panel-body" id="keys-list">
+          <div class="empty"><div class="empty-ico">🔑</div><div>Belum ada API key</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: USAGE -->
+    <div class="page" id="page-usage">
+      <div class="hero">
+        <h1>📈 Usage</h1>
+        <p>Pantau penggunaan API key kamu secara realtime.</p>
+      </div>
+      <div class="stats">
+        <div class="stat-card"><div class="stat-val" id="usage-today">0</div><div class="stat-label">Request Hari Ini</div></div>
+        <div class="stat-card"><div class="stat-val" id="usage-tokens">0</div><div class="stat-label">Token Dipakai</div></div>
+        <div class="stat-card"><div class="stat-val" id="usage-remain">100</div><div class="stat-label">Sisa Limit Hari Ini</div></div>
+      </div>
+    </div>
+
+    <!-- PAGE: MODELS -->
+    <div class="page" id="page-models">
+      <div class="hero">
+        <h1>🤖 Available Models</h1>
+        <p>Model AI yang tersedia di Apollo API. Model Pro memerlukan upgrade tier.</p>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Free Tier</span></div>
+        <div class="panel-body">
+          <div class="model-row"><div class="model-dot"></div><div><div class="model-name">apollo-nano</div><div class="model-id">llama-3.1-8b-instant · 128K context</div></div><span class="tier-badge free">FREE</span></div>
+          <div class="model-row"><div class="model-dot"></div><div><div class="model-name">apollo-core</div><div class="model-id">llama-3.3-70b-versatile · 128K context</div></div><span class="tier-badge free">FREE</span></div>
+          <div class="model-row"><div class="model-dot"></div><div><div class="model-name">apollo-scout</div><div class="model-id">llama-4-scout-17b · 10K context</div></div><span class="tier-badge free">FREE</span></div>
+          <div class="model-row"><div class="model-dot"></div><div><div class="model-name">apollo-qwen</div><div class="model-id">qwen3-32b · 32K context</div></div><span class="tier-badge free">FREE</span></div>
+          <div class="model-row"><div class="model-dot"></div><div><div class="model-name">apollo-code</div><div class="model-id">gpt-oss-20b · 8K context</div></div><span class="tier-badge free">FREE</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Pro Tier</span></div>
+        <div class="panel-body">
+          <div class="model-row"><div class="model-dot pro"></div><div><div class="model-name">apollo-max</div><div class="model-id">gpt-oss-120b · 8K context</div></div><span class="tier-badge pro">PRO</span></div>
+          <div class="model-row"><div class="model-dot pro"></div><div><div class="model-name">apollo-guard</div><div class="model-id">gpt-oss-safeguard-20b · 8K context</div></div><span class="tier-badge pro">PRO</span></div>
+          <div class="model-row"><div class="model-dot pro"></div><div><div class="model-name">apollo-compound</div><div class="model-id">groq/compound · 128K context</div></div><span class="tier-badge pro">PRO</span></div>
+          <div class="model-row"><div class="model-dot pro"></div><div><div class="model-name">apollo-compound-mini</div><div class="model-id">groq/compound-mini · 128K context</div></div><span class="tier-badge pro">PRO</span></div>
+          <div class="model-row"><div class="model-dot pro"></div><div><div class="model-name">apollo-vision</div><div class="model-id">llama-3.2-90b-vision-preview · 8K context</div></div><span class="tier-badge pro">PRO</span></div>
+          <div class="model-row"><div class="model-dot pro"></div><div><div class="model-name">apollo-vision-mini</div><div class="model-id">llama-3.2-11b-vision-preview · 8K context</div></div><span class="tier-badge pro">PRO</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: QUICKSTART -->
+    <div class="page" id="page-quickstart">
+      <div class="hero">
+        <h1>🚀 Quickstart</h1>
+        <p>Mulai pakai Apollo AI API dalam hitungan menit. Kompatibel dengan format OpenAI.</p>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">1. Buat API Key</span></div>
+        <div class="panel-body">Pergi ke halaman <strong>API Keys</strong> dan klik "Generate Key". Salin key yang dihasilkan.</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">2. Chat Completions — cURL</span></div>
+        <div class="panel-body">
+          <div class="code-block">
+<button class="copy-code" onclick="copyCode(this)">Copy</button>
+<span class="comment"># Kirim request ke Apollo API</span>
+curl https://apollo-api.vercel.app/v1/chat/completions \
+  -H <span class="string">"Authorization: Bearer apollo-sk-xxxx-xxxx-xxxx"</span> \
+  -H <span class="string">"Content-Type: application/json"</span> \
+  -d <span class="string">'{
+    "model": "apollo-core",
+    "messages": [
+      {"role": "user", "content": "Halo Apollo!"}
+    ]
+  }'</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">3. Python</span></div>
+        <div class="panel-body">
+          <div class="code-block">
+<button class="copy-code" onclick="copyCode(this)">Copy</button>
+<span class="comment"># pip install openai</span>
+<span class="key">from</span> openai <span class="key">import</span> OpenAI
+
+client = OpenAI(
+    api_key=<span class="string">"apollo-sk-xxxx-xxxx-xxxx"</span>,
+    base_url=<span class="string">"https://apollo-api.vercel.app/v1"</span>
+)
+
+response = client.chat.completions.create(
+    model=<span class="string">"apollo-core"</span>,
+    messages=[{<span class="string">"role"</span>: <span class="string">"user"</span>, <span class="string">"content"</span>: <span class="string">"Halo Apollo!"</span>}]
+)
+<span class="key">print</span>(response.choices[<span class="num">0</span>].message.content)
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">4. JavaScript / Node.js</span></div>
+        <div class="panel-body">
+          <div class="code-block">
+<button class="copy-code" onclick="copyCode(this)">Copy</button>
+<span class="comment">// npm install openai</span>
+<span class="key">import</span> OpenAI <span class="key">from</span> <span class="string">'openai'</span>;
+
+<span class="key">const</span> client = <span class="key">new</span> OpenAI({
+  apiKey: <span class="string">'apollo-sk-xxxx-xxxx-xxxx'</span>,
+  baseURL: <span class="string">'https://apollo-api.vercel.app/v1'</span>
+});
+
+<span class="key">const</span> res = <span class="key">await</span> client.chat.completions.create({
+  model: <span class="string">'apollo-core'</span>,
+  messages: [{ role: <span class="string">'user'</span>, content: <span class="string">'Halo Apollo!'</span> }]
+});
+console.log(res.choices[<span class="num">0</span>].message.content);
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">📊 Rate Limits</span></div>
+        <div class="panel-body">
+          <div class="model-row">
+            <div style="flex:1"><div class="model-name">Free</div><div class="model-id">apollo-nano, apollo-core saja</div></div>
+            <div style="text-align:right;font-size:12px;color:var(--muted)">100 req/hari · 5 req/menit</div>
+          </div>
+          <div class="model-row">
+            <div style="flex:1"><div class="model-name">Pro</div><div class="model-id">Semua model</div></div>
+            <div style="text-align:right;font-size:12px;color:var(--muted)">1.000 req/hari · 20 req/menit</div>
+          </div>
+          <div class="model-row">
+            <div style="flex:1"><div class="model-name">Developer</div><div class="model-id">Semua model · Priority</div></div>
+            <div style="text-align:right;font-size:12px;color:var(--muted)">10.000 req/hari · 60 req/menit</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SB_URL  = 'https://shvtvwpycygshcyiyxsv.supabase.co';
+const SB_ANON = 'sb_publishable_XuLP8WNphgA7KJ8OmRv9kw_n2y2HWuQ';
+const API_URL = 'https://apollo-api.vercel.app';
+
+let userToken = localStorage.getItem('apollo_api_token') || '';
+let userData  = JSON.parse(localStorage.getItem('apollo_api_user') || 'null');
+
+function toast(msg, ok=true) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.borderColor = ok ? 'var(--green)' : 'var(--red)';
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ── AUTH ──
+async function doLogin() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const err   = document.getElementById('auth-err');
+  const btn   = document.getElementById('auth-btn');
+  err.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Masuk...';
+
+  try {
+    const res = await fetch(`${SB_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'apikey': SB_ANON },
+      body: JSON.stringify({ email, password: pass })
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error_description || 'Login gagal');
+
+    userToken = d.access_token;
+    userData  = { id: d.user.id, email, name: d.user.user_metadata?.name || email.split('@')[0] };
+    localStorage.setItem('apollo_api_token', userToken);
+    localStorage.setItem('apollo_api_user', JSON.stringify(userData));
+    initDashboard();
+  } catch(e) {
+    err.textContent = e.message;
+    err.style.display = 'block';
+  }
+  btn.disabled = false; btn.textContent = 'Masuk';
+}
+
+function doLogout() {
+  localStorage.removeItem('apollo_api_token');
+  localStorage.removeItem('apollo_api_user');
+  userToken = ''; userData = null;
+  document.getElementById('auth-overlay').style.display = 'flex';
+  document.getElementById('logout-btn').style.display = 'none';
+}
+
+function initDashboard() {
+  if (!userToken) return;
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('logout-btn').style.display = 'block';
+  document.getElementById('user-email-display').textContent = userData?.email || '';
+  document.getElementById('user-name').textContent = userData?.name || 'Developer';
+  loadKeys();
+}
+
+// ── API KEYS ──
+async function loadKeys() {
+  try {
+    const res = await fetch(`${API_URL}/api/keys`, {
+      headers: { 'Authorization': 'Bearer ' + userToken }
+    });
+    const d = await res.json();
+    const keys = d.keys || [];
+
+    document.getElementById('stat-keys').textContent = keys.filter(k=>k.is_active).length;
+    document.getElementById('stat-usage').textContent = keys.reduce((s,k)=>s+(k.usage_count||0),0);
+
+    renderKeys(keys);
+  } catch(e) { console.error(e); }
+}
+
+function renderKeys(keys) {
+  const el = document.getElementById('keys-list');
+  if (!keys.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">🔑</div><div>Belum ada API key. Buat yang pertama!</div></div>';
+    return;
+  }
+
+  el.innerHTML = keys.map(k => `
+    <div class="key-card" id="kc-${k.id}">
+      <div class="key-row">
+        <div class="key-name">${k.name}</div>
+        <span class="tier-badge ${k.tier}">${k.tier.toUpperCase()}</span>
+        <span style="font-size:11px;color:${k.is_active?'var(--green)':'var(--red)'}">${k.is_active?'●  Aktif':'● Nonaktif'}</span>
+      </div>
+      <div class="key-val">
+        <span class="key-text" id="kv-${k.id}">${k.key.slice(0,24)}•••••••••••••</span>
+        <button class="btn-sm copy" onclick="toggleShowKey('${k.id}','${k.key}')">👁 Show</button>
+      </div>
+      <div class="key-meta" style="margin-top:8px">
+        <span>📊 ${k.usage_count||0} requests</span>
+        <span>🕐 Dibuat: ${new Date(k.created_at).toLocaleDateString('id')}</span>
+        ${k.last_used_at ? '<span>✅ Terakhir: '+new Date(k.last_used_at).toLocaleDateString('id')+'</span>' : ''}
+        ${k.expires_at ? '<span>⏳ Exp: '+new Date(k.expires_at).toLocaleDateString('id')+'</span>' : ''}
+      </div>
+      <div class="key-actions">
+        <button class="btn-sm copy" onclick="copyKey('${k.key}')">📋 Copy Key</button>
+        <button class="btn-sm danger" onclick="revokeKey('${k.id}')">🗑 Hapus</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleShowKey(id, key) {
+  const el = document.getElementById('kv-' + id);
+  const showing = el.dataset.showing === '1';
+  el.textContent = showing ? key.slice(0,24)+'•••••••••••••' : key;
+  el.dataset.showing = showing ? '0' : '1';
+}
+
+function copyKey(key) {
+  navigator.clipboard?.writeText(key).then(() => toast('✅ Key disalin!'));
+}
+
+function copyCode(btn) {
+  const block = btn.closest('.code-block');
+  const text = block.innerText.replace('Copy','').trim();
+  navigator.clipboard?.writeText(text).then(() => { btn.textContent='✓ Copied'; setTimeout(()=>btn.textContent='Copy',2000); });
+}
+
+async function generateKey() {
+  const name = document.getElementById('key-name').value.trim() || 'My Apollo Key';
+  try {
+    const res = await fetch(`${API_URL}/api/keys`, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+userToken },
+      body: JSON.stringify({ name })
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error);
+    toast('✅ API key berhasil dibuat!');
+    document.getElementById('key-name').value = '';
+    loadKeys();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+async function revokeKey(id) {
+  if (!confirm('Hapus API key ini? Tidak bisa digunakan lagi.')) return;
+  try {
+    const res = await fetch(`${API_URL}/api/keys`, {
+      method: 'DELETE',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+userToken },
+      body: JSON.stringify({ key_id: id })
+    });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error);
+    toast('✅ Key dihapus.');
+    loadKeys();
+  } catch(e) { toast('❌ '+e.message, false); }
+}
+
+// ── NAVIGATION ──
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('show'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('show');
+  if(el) el.classList.add('active');
+  if(id==='usage') loadUsage();
+}
+
+async function loadUsage() {
+  try {
+    const res = await fetch(`${API_URL}/api/keys`, {
+      headers: { 'Authorization': 'Bearer ' + userToken }
+    });
+    const d = await res.json();
+    const keys = d.keys || [];
+    const total = keys.reduce((s,k)=>s+(k.usage_count||0),0);
+    document.getElementById('usage-today').textContent = total;
+    document.getElementById('usage-tokens').textContent = '—';
+    document.getElementById('usage-remain').textContent = 100 - total > 0 ? 100 - total : 0;
+  } catch(e) {}
+}
+
+// ── INIT ──
+document.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+if (userToken && userData) initDashboard();
+else document.getElementById('auth-overlay').style.display = 'flex';
+</script>
+</body>
+</html>
